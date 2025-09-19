@@ -1,0 +1,107 @@
+{
+  "tenantId": "pg",
+  "moduleName": "tenant",
+  "tenants": [
+    {
+      "code": "pg.citya",
+      "name": "City A Municipal Corporation",
+      "description": "City A Municipal Corporation - Smart Permit System",
+      "logoId": "https://via.placeholder.com/100x100.png?text=CityA",
+      "imageId": "https://via.placeholder.com/300x200.png?text=CityA+Logo",
+      "domainUrl": "https://citya.digit.org",
+      "type": "CITY",
+      "twitterUrl": "https://twitter.com/cityamunicipal",
+      "facebookUrl": "https://www.facebook.com/cityamunicipal",
+      "emailId": "permits@citya.gov.in",
+      "contactNumber": "+91-123-456-7890",
+      "helpLineNumber": "+91-123-456-7891",
+      "OfficeTimings": {
+        "Mon - Fri": "9:00 AM - 6:00 PM",
+        "Saturday": "9:00 AM - 1:00 PM",
+        "Sunday": "Closed"
+      },
+      "city": {
+        "name": "City A",
+        "localName": "शहर ए",
+        "districtCode": "CITYA",
+        "districtName": "City A District",
+        "districtLocalName": "शहर ए जिला",
+        "regionName": "Central Region",
+        "regionLocalName": "मध्य क्षेत्र",
+        "ulbGrade": "Municipal Corporation",
+        "latitude": 26.8467,
+        "longitude": 80.9462,
+        "shapeFileLocation": "",
+        "captcha": {
+          "enableWhitelisting": true,
+          "whitelistUrls": [
+            "/citizen",
+            "/digit-ui",
+            "/employee",
+            "/employee/user/login",
+            "/employee/user/authenticate"
+          ]
+        },
+        "googleApiKey": "",
+        "enableGoogleTranslation": false
+      },
+      "address": "City A Municipal Corporation, Civil Lines, City A - 226001",
+      "pincode": ["226001", "226002", "226003", "226004"],
+      "boundary": {
+        "Ward": [
+          {
+            "name": "Ward 1",
+            "code": "W001",
+            "area": 2.5,
+            "population": 5000
+          },
+          {
+            "name": "Ward 2", 
+            "code": "W002",
+            "area": 3.2,
+            "population": 6500
+          },
+          {
+            "name": "Ward 3",
+            "code": "W003", 
+            "area": 2.8,
+            "population": 4800
+          }
+        ],
+        "Zone": [
+          {
+            "name": "North Zone",
+            "code": "NZ",
+            "wards": ["W001", "W002"]
+          },
+          {
+            "name": "South Zone", 
+            "code": "SZ",
+            "wards": ["W003"]
+          }
+        ]
+      },
+      "languages": [
+        {
+          "label": "English",
+          "value": "en_IN",
+          "isDefault": true
+        },
+        {
+          "label": "हिंदी",
+          "value": "hi_IN"
+        }
+      ],
+      "localization": {
+        "defaultLocale": "en_IN",
+        "fallbackLocale": "en_IN",
+        "supportedLocales": ["en_IN", "hi_IN"]
+      },
+      "pdfContactDetails": {
+        "email": "permits@citya.gov.in",
+        "phone": "+91-123-456-7890",
+        "website": "https://citya.gov.in"
+      }
+    }
+  ]
+}

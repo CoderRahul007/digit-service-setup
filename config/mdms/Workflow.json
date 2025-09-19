@@ -1,0 +1,94 @@
+{
+  "tenantId": "pg",
+  "moduleName": "Workflow",
+  "Workflow": [
+    {
+      "tenantId": "pg",
+      "name": "PERMIT_WORKFLOW",
+      "code": "PERMIT_WORKFLOW",
+      "description": "Basic permit workflow configuration",
+      "version": "1.0.0",
+      "isActive": true,
+      "states": [
+        {
+          "uuid": "state-applied",
+          "tenantId": "pg",
+          "businessServiceId": "permit-workflow",
+          "sla": 86400000,
+          "state": "APPLIED",
+          "applicationStatus": "APPLIED",
+          "docUploadRequired": false,
+          "isStartState": true,
+          "isTerminateState": false,
+          "isStateUpdatable": true,
+          "actions": [
+            {
+              "uuid": "action-submit",
+              "tenantId": "pg",
+              "currentState": "APPLIED",
+              "action": "SUBMIT",
+              "nextState": "PENDING_APPROVAL",
+              "roles": ["CITIZEN"]
+            }
+          ]
+        },
+        {
+          "uuid": "state-pending",
+          "tenantId": "pg",
+          "businessServiceId": "permit-workflow",
+          "sla": 86400000,
+          "state": "PENDING_APPROVAL",
+          "applicationStatus": "PENDING_APPROVAL",
+          "docUploadRequired": false,
+          "isStartState": false,
+          "isTerminateState": false,
+          "isStateUpdatable": true,
+          "actions": [
+            {
+              "uuid": "action-approve",
+              "tenantId": "pg",
+              "currentState": "PENDING_APPROVAL",
+              "action": "APPROVE",
+              "nextState": "APPROVED",
+              "roles": ["APPROVER"]
+            },
+            {
+              "uuid": "action-reject",
+              "tenantId": "pg",
+              "currentState": "PENDING_APPROVAL",
+              "action": "REJECT",
+              "nextState": "REJECTED",
+              "roles": ["APPROVER"]
+            }
+          ]
+        },
+        {
+          "uuid": "state-approved",
+          "tenantId": "pg",
+          "businessServiceId": "permit-workflow",
+          "sla": null,
+          "state": "APPROVED",
+          "applicationStatus": "APPROVED",
+          "docUploadRequired": false,
+          "isStartState": false,
+          "isTerminateState": true,
+          "isStateUpdatable": false,
+          "actions": []
+        },
+        {
+          "uuid": "state-rejected",
+          "tenantId": "pg",
+          "businessServiceId": "permit-workflow",
+          "sla": null,
+          "state": "REJECTED",
+          "applicationStatus": "REJECTED",
+          "docUploadRequired": false,
+          "isStartState": false,
+          "isTerminateState": true,
+          "isStateUpdatable": false,
+          "actions": []
+        }
+      ]
+    }
+  ]
+}

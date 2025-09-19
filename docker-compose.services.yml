@@ -1,0 +1,418 @@
+services:
+  user:
+    image: egovio/egov-user-db:DIGIT-2.9-LTS-c33cfe45ab-19
+    container_name: ${COMPOSE_PROJECT_NAME:-digit-oss}-user
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-egov}?currentSchema=egov_user
+      - SPRING_DATASOURCE_USERNAME=${DB_USER:-postgres}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-postgres}
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA=egov_user
+      - SPRING_FLYWAY_ENABLED=true
+      - SPRING_FLYWAY_URL=jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-egov}
+      - SPRING_FLYWAY_USER=${DB_USER:-postgres}
+      - SPRING_FLYWAY_PASSWORD=${DB_PASSWORD:-postgres}
+      - SPRING_FLYWAY_SCHEMAS=egov_user
+      - SPRING_FLYWAY_DEFAULT_SCHEMA=egov_user
+      - SPRING_FLYWAY_CREATE_SCHEMAS=true
+      - FLYWAY_URL=jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-egov}
+      - FLYWAY_USER=${DB_USER:-postgres}
+      - FLYWAY_PASSWORD=${DB_PASSWORD:-postgres}
+      - FLYWAY_SCHEMAS=egov_user
+      - FLYWAY_DEFAULT_SCHEMA=egov_user
+      - SPRING_REDIS_HOST=${REDIS_HOST:-redis}
+      - SPRING_REDIS_PORT=${REDIS_PORT:-6379}
+      - SPRING_REDIS_PASSWORD=${REDIS_PASSWORD:-redis123}
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BROKER_HOST:-kafka:9092}
+      - SPRING_KAFKA_CONSUMER_GROUP_ID=user-service-group
+      - SERVER_SERVLET_CONTEXT_PATH=/user
+      - SERVER_PORT=8080
+      - EGOV_OTP_HOST=http://notification-sms:8080/
+      - EGOV_MDMS_HOST=http://mdms-service:8080/
+      - EGOV_FILESTORE_HOST=http://filestore:8080/
+      - JAVA_OPTS=-Xmx256m -Xms128m
+      - JAVA_ARGS=-Dspring.profiles.active=monitoring
+      - EGOV_USER_HOST=http://user:8080
+      - EGOV_IDGEN_HOST=http://egov-idgen:8080/
+      - TRACER_ERRORS_PROVIDEEXCEPTIONINDETAILS=true
+    ports: ["8081:8080"]
+    depends_on: [postgres, redis, kafka]
+    networks: [digit-network]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/user/health || exit 1"]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 90s
+    restart: unless-stopped
+
+  access-control:
+    image: egovio/egov-accesscontrol:DIGIT-2.9-LTS-237578ce80-10
+    container_name: ${COMPOSE_PROJECT_NAME:-digit-oss}-access-control
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-egov}?currentSchema=egov_access
+      - SPRING_DATASOURCE_USERNAME=${DB_USER:-postgres}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-postgres}
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA=egov_access
+      - SPRING_FLYWAY_URL=jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-egov}
+      - SPRING_FLYWAY_USER=${DB_USER:-postgres}
+      - SPRING_FLYWAY_PASSWORD=${DB_PASSWORD:-postgres}
+      - SPRING_FLYWAY_SCHEMAS=egov_access
+      - SPRING_FLYWAY_DEFAULT_SCHEMA=egov_access
+      - SPRING_FLYWAY_CREATE_SCHEMAS=true
+      - FLYWAY_URL=jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-egov}
+      - FLYWAY_USER=${DB_USER:-postgres}
+      - FLYWAY_PASSWORD=${DB_PASSWORD:-postgres}
+      - FLYWAY_SCHEMAS=egov_access
+      - FLYWAY_DEFAULT_SCHEMA=egov_access
+      - SPRING_REDIS_HOST=${REDIS_HOST:-redis}
+      - SPRING_REDIS_PORT=${REDIS_PORT:-6379}
+      - SPRING_REDIS_PASSWORD=${REDIS_PASSWORD:-redis123}
+      - EGOV_USER_HOST=http://user:8080
+      - EGOV_MDMS_HOST=http://mdms-service:8080
+      - SERVER_SERVLET_CONTEXT_PATH=/access
+      - SERVER_PORT=8080
+      - JAVA_OPTS=-Xmx256m -Xms128m
+      - JAVA_ARGS=-Dspring.profiles.active=monitoring
+      - TRACER_ERRORS_PROVIDEEXCEPTIONINDETAILS=true
+      - SPRING_DATASOURCE_HIKARI_MAXLIFETIME=300000
+    ports: ["8082:8080"]
+    depends_on: [user, postgres]
+    networks: [digit-network]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/access/health || exit 1"]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 90s
+    restart: unless-stopped
+
+  mdms-service:
+    image: egovio/egov-mdms-service:DIGIT-2.9-LTS-07f47790b8-14
+    container_name: ${COMPOSE_PROJECT_NAME:-digit-oss}-mdms-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-egov}?currentSchema=mdms
+      - SPRING_DATASOURCE_USERNAME=${DB_USER:-postgres}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-postgres}
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA=mdms
+      - SPRING_FLYWAY_URL=jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-egov}
+      - SPRING_FLYWAY_USER=${DB_USER:-postgres}
+      - SPRING_FLYWAY_PASSWORD=${DB_PASSWORD:-postgres}
+      - SPRING_FLYWAY_SCHEMAS=mdms
+      - SPRING_FLYWAY_DEFAULT_SCHEMA=mdms
+      - SPRING_FLYWAY_CREATE_SCHEMAS=true
+      - FLYWAY_URL=jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-egov}
+      - FLYWAY_USER=${DB_USER:-postgres}
+      - FLYWAY_PASSWORD=${DB_PASSWORD:-postgres}
+      - FLYWAY_SCHEMAS=mdms
+      - FLYWAY_DEFAULT_SCHEMA=mdms
+      - MDMS_CONF_PATH=/opt/mdms
+      - MASTERS_CONFIG_BASE_PATH=/opt/mdms
+      - SERVER_SERVLET_CONTEXT_PATH=/egov-mdms-service
+      - SERVER_PORT=8080
+      - JAVA_OPTS=-Xmx256m -Xms128m
+      - JAVA_ARGS=-Dspring.profiles.active=monitoring
+      - TRACER_ERRORS_PROVIDEEXCEPTIONINDETAILS=true
+    ports: ["8083:8080"]
+    depends_on: [postgres]
+    volumes:
+      - ${PROJECT_DIR}/config/mdms:/opt/mdms:ro
+    networks: [digit-network]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/egov-mdms-service/health || exit 1"]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 90s
+    restart: unless-stopped
+
+  workflow-v2:
+    build:
+      context: ${DIGIT_LOCAL_DIR_SERVICES}/egov-workflow-v2
+      dockerfile: Dockerfile
+    image: local/egov-workflow-v2:latest
+    container_name: ${COMPOSE_PROJECT_NAME:-digit-oss}-workflow-v2
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-egov}?currentSchema=workflow
+      - SPRING_DATASOURCE_USERNAME=${DB_USER:-postgres}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-postgres}
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA=workflow
+      - SPRING_FLYWAY_URL=jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-egov}
+      - SPRING_FLYWAY_USER=${DB_USER:-postgres}
+      - SPRING_FLYWAY_PASSWORD=${DB_PASSWORD:-postgres}
+      - SPRING_FLYWAY_SCHEMAS=workflow
+      - SPRING_FLYWAY_DEFAULT_SCHEMA=workflow
+      - SPRING_FLYWAY_CREATE_SCHEMAS=true
+      - FLYWAY_URL=jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-egov}
+      - FLYWAY_USER=${DB_USER:-postgres}
+      - FLYWAY_PASSWORD=${DB_PASSWORD:-postgres}
+      - FLYWAY_SCHEMAS=workflow
+      - FLYWAY_DEFAULT_SCHEMA=workflow
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BROKER_HOST:-kafka:9092}
+      - SPRING_KAFKA_CONSUMER_GROUP_ID=workflow-service-group
+      - EGOV_USER_HOST=http://user:8080
+      - EGOV_MDMS_HOST=http://mdms-service:8080
+      - SERVER_SERVLET_CONTEXT_PATH=/egov-workflow-v2
+      - SERVER_PORT=8080
+      - JAVA_OPTS=-Xmx256m -Xms128m
+      - JAVA_ARGS=-Dspring.profiles.active=monitoring
+      - TRACER_ERRORS_PROVIDEEXCEPTIONINDETAILS=true
+    ports: ["8084:8080"]
+    depends_on: [user, mdms-service, kafka, postgres]
+    networks: [digit-network]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/egov-workflow-v2/health || exit 1"]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 90s
+    restart: unless-stopped
+
+  billing-service:
+    image: egovio/billing-service:v1.3.7-d3b373c7ce-17
+    container_name: ${COMPOSE_PROJECT_NAME:-digit-oss}-billing-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-egov}?currentSchema=billing
+      - SPRING_DATASOURCE_USERNAME=${DB_USER:-postgres}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-postgres}
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA=billing
+      - SPRING_FLYWAY_URL=jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-egov}
+      - SPRING_FLYWAY_USER=${DB_USER:-postgres}
+      - SPRING_FLYWAY_PASSWORD=${DB_PASSWORD:-postgres}
+      - SPRING_FLYWAY_SCHEMAS=billing
+      - SPRING_FLYWAY_DEFAULT_SCHEMA=billing
+      - SPRING_FLYWAY_CREATE_SCHEMAS=true
+      - FLYWAY_URL=jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-egov}
+      - FLYWAY_USER=${DB_USER:-postgres}
+      - FLYWAY_PASSWORD=${DB_PASSWORD:-postgres}
+      - FLYWAY_SCHEMAS=billing
+      - FLYWAY_DEFAULT_SCHEMA=billing
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BROKER_HOST:-kafka:9092}
+      - SPRING_KAFKA_CONSUMER_GROUP_ID=billing-service-group
+      - EGOV_MDMS_HOST=http://mdms-service:8080
+      - SERVER_SERVLET_CONTEXT_PATH=/billing-service
+      - SERVER_PORT=8080
+      - JAVA_OPTS=-Xmx256m -Xms128m
+      - JAVA_ARGS=-Dspring.profiles.active=monitoring
+      - TRACER_ERRORS_PROVIDEEXCEPTIONINDETAILS=true
+    ports: ["8085:8080"]
+    depends_on: [mdms-service, kafka, postgres]
+    networks: [digit-network]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/billing-service/health || exit 1"]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 90s
+    restart: unless-stopped
+
+  collection-services:
+    image: egovio/collection-services:develop-a9653357f1-3
+    container_name: ${COMPOSE_PROJECT_NAME:-digit-oss}-collection-services
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-egov}?currentSchema=collection
+      - SPRING_DATASOURCE_USERNAME=${DB_USER:-postgres}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-postgres}
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA=collection
+      - SPRING_FLYWAY_URL=jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-egov}
+      - SPRING_FLYWAY_USER=${DB_USER:-postgres}
+      - SPRING_FLYWAY_PASSWORD=${DB_PASSWORD:-postgres}
+      - SPRING_FLYWAY_SCHEMAS=collection
+      - SPRING_FLYWAY_DEFAULT_SCHEMA=collection
+      - SPRING_FLYWAY_CREATE_SCHEMAS=true
+      - FLYWAY_URL=jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-egov}
+      - FLYWAY_USER=${DB_USER:-postgres}
+      - FLYWAY_PASSWORD=${DB_PASSWORD:-postgres}
+      - FLYWAY_SCHEMAS=collection
+      - FLYWAY_DEFAULT_SCHEMA=collection
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BROKER_HOST:-kafka:9092}
+      - SPRING_KAFKA_CONSUMER_GROUP_ID=collection-service-group
+      - EGOV_BILLING_SERVICE_HOST=http://billing-service:8080
+      - EGOV_USER_HOST=http://user:8080
+      - SERVER_SERVLET_CONTEXT_PATH=/collection-services
+      - SERVER_PORT=8080
+      - JAVA_OPTS=-Xmx256m -Xms128m
+      - JAVA_ARGS=-Dspring.profiles.active=monitoring
+      - TRACER_ERRORS_PROVIDEEXCEPTIONINDETAILS=true
+    ports: ["8086:8080"]
+    depends_on: [billing-service, user, kafka, postgres]
+    networks: [digit-network]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/collection-services/health || exit 1"]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 90s
+    restart: unless-stopped
+
+  notification-sms:
+    image: egovio/egov-notification-sms:DIGIT-2.9-LTS-07f47790b8-7
+    container_name: ${COMPOSE_PROJECT_NAME:-digit-oss}-notification-sms
+    environment:
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BROKER_HOST:-kafka:9092}
+      - SPRING_KAFKA_CONSUMER_GROUP_ID=notification-sms-group
+      - SMS_PROVIDER_URL=${SMS_PROVIDER_URL:-https://mock-sms-provider.com}
+      - SMS_PROVIDER_USERNAME=dummy_user
+      - SMS_PROVIDER_PASSWORD=dummy_pass
+      - SMS_SENDER_ID=EGOV
+      - SMS_VERIFY_URL=${SMS_PROVIDER_URL:-https://mock-sms-provider.com}/verify
+      - SERVER_SERVLET_CONTEXT_PATH=/notification-sms
+      - SERVER_PORT=8080
+      - JAVA_OPTS=-Xmx256m -Xms128m
+      - JAVA_ARGS=-Dspring.profiles.active=monitoring
+      - TRACER_ERRORS_PROVIDEEXCEPTIONINDETAILS=true
+      - EGOV_SMS_MOCK_ENABLED=${EGOV_SMS_MOCK_ENABLED:-true}
+    ports: ["8087:8080"]
+    depends_on: [kafka]
+    networks: [digit-network]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/notification-sms/health || exit 1"]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped    
+
+  filestore:
+    image: egovio/egov-filestore-db:DIGIT-2.9-LTS-237578ce80-14
+    container_name: ${COMPOSE_PROJECT_NAME:-digit-oss}-filestore
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-egov}?currentSchema=filestore
+      - SPRING_DATASOURCE_USERNAME=${DB_USER:-postgres}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-postgres}
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA=filestore
+      - SPRING_FLYWAY_URL=jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-egov}
+      - SPRING_FLYWAY_USER=${DB_USER:-postgres}
+      - SPRING_FLYWAY_PASSWORD=${DB_PASSWORD:-postgres}
+      - SPRING_FLYWAY_SCHEMAS=filestore
+      - SPRING_FLYWAY_DEFAULT_SCHEMA=filestore
+      - SPRING_FLYWAY_CREATE_SCHEMAS=true
+      - FLYWAY_URL=jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-egov}
+      - FLYWAY_USER=${DB_USER:-postgres}
+      - FLYWAY_PASSWORD=${DB_PASSWORD:-postgres}
+      - FLYWAY_SCHEMAS=filestore
+      - FLYWAY_DEFAULT_SCHEMA=filestore
+      - FILE_STORAGE_MOUNT_PATH=/opt/eGov/filestore
+      - DISK_STORAGE_HOST_URL=http://filestore:8080
+      - FILE_STORAGE_TYPE=DISK
+      - SERVER_SERVLET_CONTEXT_PATH=/filestore
+      - SERVER_PORT=8080
+      - JAVA_OPTS=-Xmx256m -Xms128m
+      - JAVA_ARGS=-Dspring.profiles.active=monitoring
+      - TRACER_ERRORS_PROVIDEEXCEPTIONINDETAILS=true
+    ports: ["8089:8080"]
+    depends_on: [postgres]
+    volumes:
+      - filestore_data:/opt/eGov/filestore
+    networks: [digit-network]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/filestore/health || exit 1"]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 90s
+    restart: unless-stopped
+
+  egov-idgen:
+    image: egovio/egov-idgen-db:DIGIT-2.9-LTS-07f47790b8-8
+    container_name: ${COMPOSE_PROJECT_NAME:-digit-oss}-egov-idgen
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-egov}?currentSchema=idgen
+      - SPRING_DATASOURCE_USERNAME=${DB_USER:-postgres}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-postgres}
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA=idgen
+      - SPRING_FLYWAY_URL=jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-egov}
+      - SPRING_FLYWAY_USER=${DB_USER:-postgres}
+      - SPRING_FLYWAY_PASSWORD=${DB_PASSWORD:-postgres}
+      - SPRING_FLYWAY_SCHEMAS=idgen
+      - SPRING_FLYWAY_DEFAULT_SCHEMA=idgen
+      - SPRING_FLYWAY_CREATE_SCHEMAS=true
+      - FLYWAY_URL=jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-egov}
+      - FLYWAY_USER=${DB_USER:-postgres}
+      - FLYWAY_PASSWORD=${DB_PASSWORD:-postgres}
+      - FLYWAY_SCHEMAS=idgen
+      - FLYWAY_DEFAULT_SCHEMA=idgen
+      - SPRING_REDIS_HOST=${REDIS_HOST:-redis}
+      - SPRING_REDIS_PORT=${REDIS_PORT:-6379}
+      - SPRING_REDIS_PASSWORD=${REDIS_PASSWORD:-redis123}
+      - SERVER_SERVLET_CONTEXT_PATH=/egov-idgen
+      - SERVER_PORT=8080
+      - JAVA_OPTS=-Xmx256m -Xms128m
+      - JAVA_ARGS=-Dspring.profiles.active=monitoring
+      - TRACER_ERRORS_PROVIDEEXCEPTIONINDETAILS=true
+    ports: ["8088:8080"]
+    depends_on: [postgres, redis]
+    networks: [digit-network]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/egov-idgen/health || exit 1"]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+
+# your custom services unchanged...
+  permit-service:
+    build:
+      context: ./services/permit-service
+      dockerfile: Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME:-digit-oss}-permit-service
+    environment:
+      - NODE_ENV=development
+      - PORT=8080
+      - DATABASE_URL=postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@${DB_HOST:-postgres}:5432/${DB_NAME:-egov}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-redis123}@${REDIS_HOST:-redis}:${REDIS_PORT:-6379}
+      - KAFKA_BROKERS=${KAFKA_BROKER_HOST:-kafka:9092}
+      - USER_SERVICE_URL=http://user:8080
+      - MDMS_SERVICE_URL=http://mdms-service:8080
+      - WORKFLOW_SERVICE_URL=http://workflow-v2:8080
+      - BILLING_SERVICE_URL=http://billing-service:8080
+      - VC_SERVICE_URL=http://vc-service:8080
+      - JWT_SECRET=${JWT_SECRET:-permit-service-jwt-secret}
+      - SERVER_SERVLET_CONTEXT_PATH=/permit
+    ports: ["8090:8080"]
+    depends_on: [user, mdms-service, workflow-v2, billing-service, postgres, kafka]
+    networks: [digit-network]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/permit/health || exit 1"]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 90s
+    restart: unless-stopped
+
+  vc-service:
+    build:
+      context: ./services/vc-service
+      dockerfile: Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME:-digit-oss}-vc-service
+    environment:
+      - NODE_ENV=development
+      - PORT=8080
+      - DATABASE_URL=postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@${DB_HOST:-postgres}:5432/${DB_NAME:-egov}
+      - PERMIT_SERVICE_URL=http://permit-service:8080
+      - QR_BASE_URL=http://localhost:${GATEWAY_PORT:-8080}/vc/verify
+      - DID_METHOD=${DID_METHOD:-did:key}
+      - KEY_STORE_PATH=/opt/vc/keys
+      - SERVER_SERVLET_CONTEXT_PATH=/vc
+    ports: ["8091:8080"]
+    depends_on: [postgres]
+    networks: [digit-network]
+    volumes:
+      - vc_keys:/opt/vc/keys
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/vc/health || exit 1"]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 90s
+    restart: unless-stopped
+
+volumes:
+  filestore_data:
+  vc_keys:
+
+networks:
+  digit-network:
+    driver: bridge
+

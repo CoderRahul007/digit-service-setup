@@ -1,0 +1,62 @@
+{
+  "tenantId": "pg.citya",
+  "moduleName": "permit-system",
+  "BusinessService": [
+    {
+      "businessService": "PERMIT_ISSUANCE",
+      "business": "permit-services",
+      "businessServiceSla": 432000000,
+      "states": [
+        {
+          "sla": null,
+          "state": "DRAFT",
+          "applicationStatus": "DRAFT",
+          "isStartState": true,
+          "isTerminateState": false,
+          "actions": [
+            {
+              "action": "SUBMIT",
+              "nextState": "SUBMITTED",
+              "roles": ["CITIZEN"]
+            }
+          ]
+        },
+        {
+          "sla": 172800000,
+          "state": "SUBMITTED",
+          "applicationStatus": "UNDER_REVIEW",
+          "isStartState": false,
+          "isTerminateState": false,
+          "actions": [
+            {
+              "action": "VERIFY_AND_FORWARD",
+              "nextState": "APPROVED",
+              "roles": ["PERMIT_VERIFIER"]
+            },
+            {
+              "action": "REJECT",
+              "nextState": "REJECTED",
+              "roles": ["PERMIT_VERIFIER"]
+            }
+          ]
+        },
+        {
+          "sla": null,
+          "state": "APPROVED",
+          "applicationStatus": "APPROVED",
+          "isStartState": false,
+          "isTerminateState": true,
+          "actions": []
+        },
+        {
+          "sla": null,
+          "state": "REJECTED",
+          "applicationStatus": "REJECTED",
+          "isStartState": false,
+          "isTerminateState": true,
+          "actions": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,263 @@
+{
+  "tenantId": "pg.citya",
+  "moduleName": "permit-system", 
+  "BusinessService": [
+    {
+      "businessService": "PERMIT_ISSUANCE",
+      "business": "permit-services",
+      "businessServiceSla": 432000000,
+      "states": [
+        {
+          "sla": null,
+          "state": "DRAFT",
+          "applicationStatus": "DRAFT",
+          "docUploadRequired": false,
+          "isStartState": true,
+          "isTerminateState": false,
+          "isStateUpdatable": true,
+          "actions": [
+            {
+              "action": "SUBMIT",
+              "nextState": "SUBMITTED",
+              "roles": ["CITIZEN"],
+              "active": true
+            },
+            {
+              "action": "SAVE_AS_DRAFT",
+              "nextState": "DRAFT", 
+              "roles": ["CITIZEN"],
+              "active": true
+            }
+          ]
+        },
+        {
+          "sla": 172800000,
+          "state": "SUBMITTED",
+          "applicationStatus": "UNDER_REVIEW",
+          "docUploadRequired": false,
+          "isStartState": false,
+          "isTerminateState": false,
+          "isStateUpdatable": false,
+          "actions": [
+            {
+              "action": "VERIFY_AND_FORWARD",
+              "nextState": "DOCUMENT_VERIFIED",
+              "roles": ["PERMIT_VERIFIER"],
+              "active": true
+            },
+            {
+              "action": "REJECT",
+              "nextState": "REJECTED",
+              "roles": ["PERMIT_VERIFIER"],
+              "active": true
+            },
+            {
+              "action": "SEND_BACK_TO_CITIZEN",
+              "nextState": "CITIZEN_ACTION_REQUIRED",
+              "roles": ["PERMIT_VERIFIER"],
+              "active": true
+            }
+          ]
+        },
+        {
+          "sla": 86400000,
+          "state": "DOCUMENT_VERIFIED",
+          "applicationStatus": "DOCUMENT_VERIFIED",
+          "docUploadRequired": false,
+          "isStartState": false,
+          "isTerminateState": false,
+          "isStateUpdatable": false,
+          "actions": [
+            {
+              "action": "SCHEDULE_INSPECTION",
+              "nextState": "INSPECTION_SCHEDULED",
+              "roles": ["PERMIT_VERIFIER"],
+              "active": true
+            },
+            {
+              "action": "APPROVE_WITHOUT_INSPECTION",
+              "nextState": "APPROVED",
+              "roles": ["PERMIT_APPROVER"],
+              "active": true
+            },
+            {
+              "action": "SEND_BACK",
+              "nextState": "SUBMITTED",
+              "roles": ["PERMIT_VERIFIER"],
+              "active": true
+            }
+          ]
+        },
+        {
+          "sla": 86400000,
+          "state": "INSPECTION_SCHEDULED",
+          "applicationStatus": "INSPECTION_SCHEDULED",
+          "docUploadRequired": false,
+          "isStartState": false,
+          "isTerminateState": false,
+          "isStateUpdatable": true,
+          "actions": [
+            {
+              "action": "COMPLETE_INSPECTION",
+              "nextState": "INSPECTION_COMPLETED",
+              "roles": ["PERMIT_VERIFIER"],
+              "active": true
+            },
+            {
+              "action": "RESCHEDULE_INSPECTION",
+              "nextState": "INSPECTION_SCHEDULED",
+              "roles": ["PERMIT_VERIFIER"],
+              "active": true
+            },
+            {
+              "action": "INSPECTION_FAILED",
+              "nextState": "CITIZEN_ACTION_REQUIRED",
+              "roles": ["PERMIT_VERIFIER"],
+              "active": true
+            }
+          ]
+        },
+        {
+          "sla": 86400000,
+          "state": "INSPECTION_COMPLETED",
+          "applicationStatus": "INSPECTION_COMPLETED",
+          "docUploadRequired": false,
+          "isStartState": false,
+          "isTerminateState": false,
+          "isStateUpdatable": false,
+          "actions": [
+            {
+              "action": "APPROVE",
+              "nextState": "APPROVED",
+              "roles": ["PERMIT_APPROVER"],
+              "active": true
+            },
+            {
+              "action": "REJECT_AFTER_INSPECTION",
+              "nextState": "REJECTED",
+              "roles": ["PERMIT_APPROVER"],
+              "active": true
+            },
+            {
+              "action": "REQUEST_ADDITIONAL_DOCUMENTS",
+              "nextState": "CITIZEN_ACTION_REQUIRED",
+              "roles": ["PERMIT_APPROVER"],
+              "active": true
+            }
+          ]
+        },
+        {
+          "sla": 86400000,
+          "state": "CITIZEN_ACTION_REQUIRED",
+          "applicationStatus": "CITIZEN_ACTION_REQUIRED",
+          "docUploadRequired": true,
+          "isStartState": false,
+          "isTerminateState": false,
+          "isStateUpdatable": true,
+          "actions": [
+            {
+              "action": "RESUBMIT",
+              "nextState": "SUBMITTED",
+              "roles": ["CITIZEN"],
+              "active": true
+            },
+            {
+              "action": "WITHDRAW_APPLICATION",
+              "nextState": "WITHDRAWN",
+              "roles": ["CITIZEN"],
+              "active": true
+            }
+          ]
+        },
+        {
+          "sla": 86400000,
+          "state": "APPROVED",
+          "applicationStatus": "APPROVED",
+          "docUploadRequired": false,
+          "isStartState": false,
+          "isTerminateState": false,
+          "isStateUpdatable": false,
+          "actions": [
+            {
+              "action": "GENERATE_PERMIT",
+              "nextState": "PERMIT_GENERATED",
+              "roles": ["PERMIT_ISSUER"],
+              "active": true
+            }
+          ]
+        },
+        {
+          "sla": 43200000,
+          "state": "PERMIT_GENERATED",
+          "applicationStatus": "PERMIT_GENERATED",
+          "docUploadRequired": false,
+          "isStartState": false,
+          "isTerminateState": false,
+          "isStateUpdatable": false,
+          "actions": [
+            {
+              "action": "ISSUE_PERMIT",
+              "nextState": "ISSUED",
+              "roles": ["PERMIT_ISSUER"],
+              "active": true
+            }
+          ]
+        },
+        {
+          "sla": null,
+          "state": "ISSUED",
+          "applicationStatus": "ISSUED",
+          "docUploadRequired": false,
+          "isStartState": false,
+          "isTerminateState": true,
+          "isStateUpdatable": false,
+          "actions": [
+            {
+              "action": "REVOKE_PERMIT",
+              "nextState": "REVOKED",
+              "roles": ["PERMIT_APPROVER", "SYSTEM_ADMIN"],
+              "active": true
+            }
+          ]
+        },
+        {
+          "sla": null,
+          "state": "REJECTED",
+          "applicationStatus": "REJECTED",
+          "docUploadRequired": false,
+          "isStartState": false,
+          "isTerminateState": true,
+          "isStateUpdatable": false,
+          "actions": [
+            {
+              "action": "REOPEN",
+              "nextState": "DRAFT",
+              "roles": ["PERMIT_APPROVER", "SYSTEM_ADMIN"],
+              "active": true
+            }
+          ]
+        },
+        {
+          "sla": null,
+          "state": "WITHDRAWN",
+          "applicationStatus": "WITHDRAWN",
+          "docUploadRequired": false,
+          "isStartState": false,
+          "isTerminateState": true,
+          "isStateUpdatable": false,
+          "actions": []
+        },
+        {
+          "sla": null,
+          "state": "REVOKED",
+          "applicationStatus": "REVOKED",
+          "docUploadRequired": false,
+          "isStartState": false,
+          "isTerminateState": true,
+          "isStateUpdatable": false,
+          "actions": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,168 @@
+
+services:
+  # Infrastructure Services
+  postgres:
+    extends:
+      file: docker-compose.infra.yml
+      service: postgres
+    
+  redis:
+    extends:
+      file: docker-compose.infra.yml
+      service: redis
+    
+  elasticsearch:
+    extends:
+      file: docker-compose.infra.yml
+      service: elasticsearch
+      
+  zookeeper:
+    extends:
+      file: docker-compose.infra.yml
+      service: zookeeper
+      
+  kafka:
+    extends:
+      file: docker-compose.infra.yml
+      service: kafka
+      
+  nginx-gateway:
+    extends:
+      file: docker-compose.infra.yml
+      service: nginx-gateway
+      
+  # Core DIGIT Services
+  user:
+    extends:
+      file: docker-compose.services.yml
+      service: user
+      
+  access-control:
+    extends:
+      file: docker-compose.services.yml
+      service: access-control
+      
+  mdms-service:
+    extends:
+      file: docker-compose.services.yml
+      service: mdms-service
+      
+  workflow-v2:
+    extends:
+      file: docker-compose.services.yml
+      service: workflow-v2
+      
+  billing-service:
+    extends:
+      file: docker-compose.services.yml
+      service: billing-service
+      
+  collection-services:
+    extends:
+      file: docker-compose.services.yml
+      service: collection-services
+      
+  notification-sms:
+    extends:
+      file: docker-compose.services.yml
+      service: notification-sms
+      
+  filestore:
+    extends:
+      file: docker-compose.services.yml
+      service: filestore
+      
+  egov-idgen:
+    extends:
+      file: docker-compose.services.yml
+      service: egov-idgen
+
+  # Custom Services (Permit System & VC)
+  permit-service:
+    build:
+      context: ./services/permit-service
+      dockerfile: Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME:-digit-oss}-permit-service
+    environment:
+      - NODE_ENV=development
+      - PORT=8080
+      - DATABASE_URL=postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@${DB_HOST:-postgres}:5432/${DB_NAME:-egov}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-redis123}@${REDIS_HOST:-redis}:${REDIS_PORT:-6379}
+      - KAFKA_BROKERS=${KAFKA_BROKER_HOST:-kafka:9092}
+      - USER_SERVICE_URL=http://user:8080
+      - MDMS_SERVICE_URL=http://mdms-service:8080
+      - WORKFLOW_SERVICE_URL=http://workflow-v2:8080
+      - BILLING_SERVICE_URL=http://billing-service:8080
+      - VC_SERVICE_URL=http://vc-service:8080
+      - JWT_SECRET=${JWT_SECRET:-permit-service-jwt-secret}
+      - SERVER_SERVLET_CONTEXT_PATH=/permit
+    ports:
+      - "8090:8080"
+    depends_on:
+      - user
+      - mdms-service
+      - workflow-v2
+      - billing-service
+    networks:
+      - digit-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/permit/health || exit 1"]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 90s
+    restart: unless-stopped
+
+  vc-service:
+    build:
+      context: ./services/vc-service
+      dockerfile: Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME:-digit-oss}-vc-service
+    environment:
+      - NODE_ENV=development
+      - PORT=8080
+      - DATABASE_URL=postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@${DB_HOST:-postgres}:5432/${DB_NAME:-egov}
+      - PERMIT_SERVICE_URL=http://permit-service:8080
+      - QR_BASE_URL=http://localhost:${GATEWAY_PORT:-8080}/vc/verify
+      - DID_METHOD=did:key
+      - KEY_STORE_PATH=/opt/vc/keys
+      - SERVER_SERVLET_CONTEXT_PATH=/vc
+    ports:
+      - "8091:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - digit-network
+    volumes:
+      - vc_keys:/opt/vc/keys
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/vc/health || exit 1"]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 90s
+    restart: unless-stopped
+
+# Include all volumes from other compose files
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  elasticsearch_data:
+    driver: local
+  kafka_data:
+    driver: local
+  zookeeper_data:
+    driver: local
+  zookeeper_logs:
+    driver: local
+  filestore_data:
+    driver: local
+  vc_keys:
+    driver: local
+
+networks:
+  digit-network:
+    driver: bridge

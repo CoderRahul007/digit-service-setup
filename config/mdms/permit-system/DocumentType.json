@@ -1,0 +1,337 @@
+{
+  "tenantId": "pg.citya",
+  "moduleName": "permit-system",
+  "DocumentType": [
+    {
+      "code": "IDENTITY_PROOF",
+      "name": "Identity Proof",
+      "localName": "पहचान प्रमाण",
+      "description": "Government issued identity document for verification",
+      "acceptedFormats": ["PDF", "JPG", "JPEG", "PNG"],
+      "maxSizeKB": 2048,
+      "required": true,
+      "category": "PERSONAL_DOCUMENT",
+      "validDocuments": [
+        {
+          "name": "Aadhaar Card",
+          "code": "AADHAAR",
+          "pattern": "^[0-9]{4}\\s[0-9]{4}\\s[0-9]{4}$",
+          "maskingRequired": true
+        },
+        {
+          "name": "Voter ID Card", 
+          "code": "VOTER_ID",
+          "pattern": "^[A-Z]{3}[0-9]{7}$",
+          "maskingRequired": false
+        },
+        {
+          "name": "Passport",
+          "code": "PASSPORT", 
+          "pattern": "^[A-Z][0-9]{7}$",
+          "maskingRequired": true
+        },
+        {
+          "name": "Driving License",
+          "code": "DRIVING_LICENSE",
+          "pattern": "^[A-Z]{2}[0-9]{2}[0-9]{4}[0-9]{7}$",
+          "maskingRequired": false
+        },
+        {
+          "name": "PAN Card",
+          "code": "PAN",
+          "pattern": "^[A-Z]{5}[0-9]{4}[A-Z]{1}$",
+          "maskingRequired": true
+        }
+      ],
+      "validationRules": {
+        "ocrRequired": false,
+        "faceMatchRequired": false,
+        "digitalVerificationSupported": true
+      }
+    },
+    {
+      "code": "ADDRESS_PROOF",
+      "name": "Address Proof",
+      "localName": "पता प्रमाण",
+      "description": "Address verification document showing current residential address",
+      "acceptedFormats": ["PDF", "JPG", "JPEG", "PNG"],
+      "maxSizeKB": 2048,
+      "required": true,
+      "category": "PERSONAL_DOCUMENT",
+      "validDocuments": [
+        {
+          "name": "Aadhaar Card",
+          "code": "AADHAAR_ADDRESS",
+          "ageLimit": 90
+        },
+        {
+          "name": "Utility Bill",
+          "code": "UTILITY_BILL",
+          "ageLimit": 90,
+          "subtypes": ["ELECTRICITY", "WATER", "GAS", "TELEPHONE"]
+        },
+        {
+          "name": "Bank Statement",
+          "code": "BANK_STATEMENT",
+          "ageLimit": 90
+        },
+        {
+          "name": "Rent Agreement",
+          "code": "RENT_AGREEMENT",
+          "registrationRequired": true
+        },
+        {
+          "name": "Property Tax Receipt",
+          "code": "PROPERTY_TAX",
+          "ageLimit": 365
+        }
+      ],
+      "validationRules": {
+        "addressMatchRequired": true,
+        "pinCodeValidation": true,
+        "municipalBoundaryCheck": true
+      }
+    },
+    {
+      "code": "MEDICAL_CERTIFICATE",
+      "name": "Medical Certificate",
+      "localName": "चिकित्सा प्रमाण पत्र",
+      "description": "Health certificate from registered medical practitioner",
+      "acceptedFormats": ["PDF", "JPG", "JPEG"],
+      "maxSizeKB": 2048,
+      "required": false,
+      "category": "HEALTH_DOCUMENT",
+      "validityDays": 180,
+      "validDocuments": [
+        {
+          "name": "Medical Certificate from Registered Doctor",
+          "code": "DOCTOR_CERTIFICATE",
+          "doctorRegistrationRequired": true
+        },
+        {
+          "name": "Government Hospital Certificate",
+          "code": "GOVT_HOSPITAL_CERTIFICATE",
+          "hospitalVerificationRequired": true
+        },
+        {
+          "name": "Medical Fitness Certificate",
+          "code": "FITNESS_CERTIFICATE",
+          "testsRequired": ["BLOOD_TEST", "VISION_TEST"]
+        }
+      ],
+      "validationRules": {
+        "doctorSignatureRequired": true,
+        "hospitalStampRequired": true,
+        "testReportsRequired": true
+      }
+    },
+    {
+      "code": "PROPERTY_DOCUMENTS",
+      "name": "Property Documents",
+      "localName": "संपत्ति दस्तावेज",
+      "description": "Property ownership or lease documents",
+      "acceptedFormats": ["PDF"],
+      "maxSizeKB": 5120,
+      "required": true,
+      "category": "PROPERTY_DOCUMENT",
+      "validDocuments": [
+        {
+          "name": "Property Registration Document",
+          "code": "PROPERTY_REGISTRATION",
+          "subRegistrarRequired": true
+        },
+        {
+          "name": "Sale Deed",
+          "code": "SALE_DEED",
+          "registrationRequired": true
+        },
+        {
+          "name": "Lease Agreement",
+          "code": "LEASE_AGREEMENT",
+          "minimumLeasePeriod": 11,
+          "registrationRequired": true
+        },
+        {
+          "name": "Title Deed",
+          "code": "TITLE_DEED",
+          "chainOfTitleRequired": true
+        }
+      ],
+      "validationRules": {
+        "surveyNumberValidation": true,
+        "encumbranceCheckRequired": true,
+        "boundaryValidation": true
+      }
+    },
+    {
+      "code": "CONSTRUCTION_PLAN",
+      "name": "Construction Plan",
+      "localName": "निर्माण योजना",
+      "description": "Approved architectural and structural plans",
+      "acceptedFormats": ["PDF", "DWG", "JPG"],
+      "maxSizeKB": 10240,
+      "required": true,
+      "category": "TECHNICAL_DOCUMENT",
+      "validDocuments": [
+        {
+          "name": "Architectural Drawing",
+          "code": "ARCHITECTURAL_PLAN",
+          "architectSignatureRequired": true,
+          "scaleRequired": true
+        },
+        {
+          "name": "Site Plan",
+          "code": "SITE_PLAN", 
+          "boundaryMarkingRequired": true,
+          "setbackDetailsRequired": true
+        },
+        {
+          "name": "Structural Plan",
+          "code": "STRUCTURAL_PLAN",
+          "engineerSignatureRequired": true,
+          "loadCalculationRequired": true
+        },
+        {
+          "name": "Electrical Plan",
+          "code": "ELECTRICAL_PLAN",
+          "electricianSignatureRequired": true
+        },
+        {
+          "name": "Plumbing Plan", 
+          "code": "PLUMBING_PLAN",
+          "sanitaryDetailsRequired": true
+        }
+      ],
+      "validationRules": {
+        "professionalSignatureRequired": true,
+        "municipalApprovalRequired": true,
+        "complianceCheckRequired": true
+      }
+    },
+    {
+      "code": "BUSINESS_PLAN",
+      "name": "Business Plan",
+      "localName": "व्यापार योजना",
+      "description": "Detailed business operation plan and financial projections",
+      "acceptedFormats": ["PDF", "DOC", "DOCX"],
+      "maxSizeKB": 5120,
+      "required": true,
+      "category": "BUSINESS_DOCUMENT",
+      "validDocuments": [
+        {
+          "name": "Business Plan Document",
+          "code": "BUSINESS_PLAN_DOC",
+          "sectionsRequired": [
+            "EXECUTIVE_SUMMARY",
+            "BUSINESS_DESCRIPTION", 
+            "MARKET_ANALYSIS",
+            "FINANCIAL_PROJECTIONS"
+          ]
+        },
+        {
+          "name": "Partnership Deed",
+          "code": "PARTNERSHIP_DEED",
+          "registrationRequired": true,
+          "partnerDetailsRequired": true
+        },
+        {
+          "name": "Memorandum of Association",
+          "code": "MOA",
+          "corporateStructureRequired": true
+        }
+      ],
+      "validationRules": {
+        "financialViabilityCheck": true,
+        "legalStructureValidation": true,
+        "complianceRequirements": true
+      }
+    },
+    {
+      "code": "FIRE_SAFETY_CERTIFICATE",
+      "name": "Fire Safety Certificate",
+      "localName": "अग्निशमन सुरक्षा प्रमाण पत्र",
+      "description": "Fire safety clearance certificate",
+      "acceptedFormats": ["PDF", "JPG"],
+      "maxSizeKB": 2048,
+      "required": false,
+      "category": "SAFETY_DOCUMENT",
+      "validityDays": 365,
+      "issueingAuthority": "FIRE_DEPARTMENT",
+      "validDocuments": [
+        {
+          "name": "Fire NOC",
+          "code": "FIRE_NOC",
+          "inspectionRequired": true
+        },
+        {
+          "name": "Fire Safety Compliance Certificate",
+          "code": "FIRE_COMPLIANCE",
+          "equipmentListRequired": true
+        }
+      ],
+      "validationRules": {
+        "authoritySignatureRequired": true,
+        "inspectionDateValidation": true,
+        "equipmentSpecificationRequired": true
+      }
+    },
+    {
+      "code": "FOOD_SAFETY_CERTIFICATE",
+      "name": "Food Safety Certificate", 
+      "localName": "खाद्य सुरक्षा प्रमाण पत्र",
+      "description": "FSSAI food safety certificate",
+      "acceptedFormats": ["PDF", "JPG"],
+      "maxSizeKB": 2048,
+      "required": false,
+      "category": "REGULATORY_DOCUMENT",
+      "validityDays": 365,
+      "issueingAuthority": "FSSAI",
+      "validDocuments": [
+        {
+          "name": "FSSAI License",
+          "code": "FSSAI_LICENSE",
+          "licenseNumberPattern": "^[0-9]{14}$"
+        },
+        {
+          "name": "Food Handler Training Certificate",
+          "code": "FOOD_HANDLER_CERT",
+          "trainingValidityDays": 365
+        }
+      ],
+      "validationRules": {
+        "fssaiVerificationRequired": true,
+        "licenseStatusCheck": true,
+        "categoryValidation": true
+      }
+    },
+    {
+      "code": "POLICE_NOC",
+      "name": "Police No Objection Certificate",
+      "localName": "पुलिस अनापत्ति प्रमाण पत्र",
+      "description": "Police clearance for events and activities",
+      "acceptedFormats": ["PDF", "JPG"],
+      "maxSizeKB": 2048,
+      "required": false,
+      "category": "CLEARANCE_DOCUMENT",
+      "validityDays": 90,
+      "issueingAuthority": "POLICE_DEPARTMENT",
+      "validDocuments": [
+        {
+          "name": "Police NOC for Events",
+          "code": "POLICE_EVENT_NOC",
+          "securityPlanRequired": true
+        },
+        {
+          "name": "Character Certificate",
+          "code": "CHARACTER_CERT",
+          "backgroundCheckRequired": true
+        }
+      ],
+      "validationRules": {
+        "policeStationVerification": true,
+        "officerSignatureRequired": true,
+        "jurisdictionValidation": true
+      }
+    }
+  ]
+}

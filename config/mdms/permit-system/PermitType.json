@@ -1,0 +1,44 @@
+{
+  "tenantId": "pg.citya",
+  "moduleName": "permit-system",
+  "PermitType": [
+    {
+      "code": "FOOD_VENDOR",
+      "name": "Food Vendor License",
+      "localName": "खाद्य विक्रेता लाइसेंस",
+      "description": "License for food stall/vendor operations",
+      "category": "TRADE_LICENSE",
+      "validityDays": 365,
+      "renewalRequired": true,
+      "fee": 500.00,
+      "applicationFee": 50.00,
+      "inspectionRequired": true,
+      "maxProcessingDays": 7,
+      "requiredDocuments": [
+        "IDENTITY_PROOF",
+        "ADDRESS_PROOF",
+        "MEDICAL_CERTIFICATE"
+      ],
+      "active": true
+    },
+    {
+      "code": "CONSTRUCTION_MINOR",
+      "name": "Minor Construction Permit",
+      "localName": "लघु निर्माण परमिट",
+      "description": "Permit for minor construction work under 1000 sq ft",
+      "category": "BUILDING_PERMIT",
+      "validityDays": 180,
+      "renewalRequired": false,
+      "fee": 1000.00,
+      "applicationFee": 100.00,
+      "inspectionRequired": true,
+      "maxProcessingDays": 15,
+      "requiredDocuments": [
+        "IDENTITY_PROOF",
+        "PROPERTY_DOCUMENTS",
+        "CONSTRUCTION_PLAN"
+      ],
+      "active": true
+    }
+  ]
+}
